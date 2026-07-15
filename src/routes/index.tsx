@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type Reading,
   type Zone,
@@ -10,6 +10,7 @@ import {
   saveReadings,
   zoneLabel,
 } from "@/lib/bp";
+import { buildPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type ExportMode = null | "menu" | "sms" | "email" | "confirm";
+
 function Index() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [open, setOpen] = useState(false);
@@ -37,6 +40,13 @@ function Index() {
   const [dia, setDia] = useState("");
   const [pul, setPul] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [undoId, setUndoId] = useState<string | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [exportMode, setExportMode] = useState<ExportMode>(null);
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [confirmMsg, setConfirmMsg] = useState("Sent successfully");
 
   useEffect(() => {
     setReadings(loadReadings());
@@ -45,6 +55,12 @@ function Index() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2200);
+  };
+
+  const scheduleUndoClear = (id: string) => {
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setUndoId(id);
+    undoTimer.current = setTimeout(() => setUndoId((cur) => (cur === id ? null : cur)), 8000);
   };
 
   const submit = (e: React.FormEvent) => {
@@ -56,8 +72,9 @@ function Index() {
       showToast("Please enter valid numbers");
       return;
     }
+    const id = crypto.randomUUID();
     const next: Reading[] = [
-      { id: crypto.randomUUID(), systolic: s, diastolic: d, pulse: p, timestamp: Date.now() },
+      { id, systolic: s, diastolic: d, pulse: p, timestamp: Date.now() },
       ...readings,
     ];
     saveReadings(next);
@@ -66,33 +83,93 @@ function Index() {
     setDia("");
     setPul("");
     setOpen(false);
+    scheduleUndoClear(id);
   };
 
   const remove = (id: string) => {
     const next = readings.filter((r) => r.id !== id);
     saveReadings(next);
     setReadings(next);
+    if (undoId === id) setUndoId(null);
   };
 
-  const share = async () => {
-    const text = buildShareText(readings);
-    const nav = navigator as Navigator & {
-      share?: (data: { title?: string; text?: string }) => Promise<void>;
-    };
-    if (nav.share) {
-      try {
-        await nav.share({ title: "Blood Pressure Log", text });
-        return;
-      } catch {
-        /* user cancelled */
-      }
+  const undoLast = () => {
+    if (!undoId) return;
+    const target = readings.find((r) => r.id === undoId);
+    if (!target) {
+      setUndoId(null);
+      return;
     }
+    const next = readings.filter((r) => r.id !== undoId);
+    saveReadings(next);
+    setReadings(next);
+    setUndoId(null);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setSys(String(target.systolic));
+    setDia(String(target.diastolic));
+    setPul(String(target.pulse));
+    setOpen(true);
+  };
+
+  const finishWithConfirm = (msg = "Sent successfully") => {
+    setConfirmMsg(msg);
+    setExportMode("confirm");
+    setTimeout(() => setExportMode(null), 1600);
+  };
+
+  const doPdf = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      showToast("Copied to clipboard");
+      const blob = buildPdf(readings);
+      const fileName = `bp-log-${new Date().toISOString().slice(0, 10)}.pdf`;
+      const file = new File([blob], fileName, { type: "application/pdf" });
+      const nav = navigator as Navigator & {
+        share?: (data: { title?: string; text?: string; files?: File[] }) => Promise<void>;
+        canShare?: (data: { files?: File[] }) => boolean;
+      };
+      if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
+        await nav.share({ title: "Blood Pressure Log", files: [file] });
+        finishWithConfirm("Shared successfully");
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      finishWithConfirm("PDF downloaded");
     } catch {
-      showToast("Unable to share");
+      showToast("Unable to export PDF");
     }
+  };
+
+  const doSms = () => {
+    const cleaned = phone.replace(/[^\d+]/g, "");
+    if (!cleaned) {
+      showToast("Enter a phone number");
+      return;
+    }
+    const body = encodeURIComponent(buildShareText(readings));
+    const ua = navigator.userAgent || "";
+    const sep = /iPhone|iPad|iPod|Macintosh/.test(ua) ? "&" : "?";
+    window.location.href = `sms:${cleaned}${sep}body=${body}`;
+    setPhone("");
+    finishWithConfirm("Opening messages…");
+  };
+
+  const doEmail = () => {
+    const trimmed = email.trim();
+    if (!trimmed || !/.+@.+\..+/.test(trimmed)) {
+      showToast("Enter a valid email");
+      return;
+    }
+    const subject = encodeURIComponent("Blood Pressure Log — Last 14 Days");
+    const body = encodeURIComponent(buildShareText(readings));
+    window.location.href = `mailto:${trimmed}?subject=${subject}&body=${body}`;
+    setEmail("");
+    finishWithConfirm("Opening email…");
   };
 
   const latest = readings[0];
@@ -110,7 +187,7 @@ function Index() {
 
         {latest && latestZone ? (
           <section
-            className="mb-6 rounded-2xl border p-6"
+            className="mb-4 rounded-2xl border p-6"
             style={{
               backgroundColor: `var(--zone-${latestZone}-bg)`,
               borderColor: `var(--zone-${latestZone})`,
@@ -143,6 +220,21 @@ function Index() {
               Tap the button below to add your first reading.
             </p>
           </section>
+        )}
+
+        {undoId && latest && undoId === latest.id && (
+          <div className="mb-6 flex items-center justify-between rounded-xl border bg-card px-4 py-3">
+            <div className="text-sm">
+              <p className="font-semibold text-foreground">Reading saved</p>
+              <p className="text-muted-foreground">Made a mistake? Undo to re-enter.</p>
+            </div>
+            <button
+              onClick={undoLast}
+              className="rounded-lg border-2 border-primary/30 px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+            >
+              Undo
+            </button>
+          </div>
         )}
 
         <div className="mb-6 flex items-center justify-between">
@@ -217,10 +309,10 @@ function Index() {
       <div className="fixed inset-x-0 bottom-0 border-t bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-md gap-3 px-5 py-4">
           <button
-            onClick={share}
+            onClick={() => setExportMode("menu")}
             className="flex-1 rounded-xl border-2 border-primary/20 bg-card px-4 py-4 text-base font-semibold text-foreground hover:bg-accent"
           >
-            Share 14-Day History
+            Export
           </button>
           <button
             onClick={() => setOpen(true)}
@@ -231,7 +323,7 @@ function Index() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Add reading modal */}
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
@@ -248,25 +340,9 @@ function Index() {
             </p>
 
             <form onSubmit={submit} className="mt-6 space-y-4">
-              <NumField
-                label="Systolic"
-                sublabel="Top number"
-                value={sys}
-                onChange={setSys}
-                autoFocus
-              />
-              <NumField
-                label="Diastolic"
-                sublabel="Bottom number"
-                value={dia}
-                onChange={setDia}
-              />
-              <NumField
-                label="Pulse"
-                sublabel="Heart rate (bpm)"
-                value={pul}
-                onChange={setPul}
-              />
+              <NumField label="Systolic" sublabel="Top number" value={sys} onChange={setSys} autoFocus />
+              <NumField label="Diastolic" sublabel="Bottom number" value={dia} onChange={setDia} />
+              <NumField label="Pulse" sublabel="Heart rate (bpm)" value={pul} onChange={setPul} />
 
               <div className="mt-6 flex gap-3">
                 <button
@@ -284,6 +360,150 @@ function Index() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Export sheet */}
+      {exportMode && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+          onClick={() => exportMode !== "confirm" && setExportMode(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl bg-background p-6 sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
+
+            {exportMode === "menu" && (
+              <>
+                <h2 className="text-2xl font-bold">Export 14-Day History</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Choose how you'd like to share your readings.
+                </p>
+                <div className="mt-6 space-y-3">
+                  <ExportOption
+                    title="Export as PDF"
+                    subtitle="Save or share via the device share sheet"
+                    onClick={doPdf}
+                  />
+                  <ExportOption
+                    title="Send via SMS"
+                    subtitle="Open Messages with a text summary"
+                    onClick={() => setExportMode("sms")}
+                  />
+                  <ExportOption
+                    title="Send via Email"
+                    subtitle="Open your email app with a text summary"
+                    onClick={() => setExportMode("email")}
+                  />
+                </div>
+                <button
+                  onClick={() => setExportMode(null)}
+                  className="mt-6 w-full rounded-xl border-2 px-4 py-4 text-base font-semibold hover:bg-accent"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+
+            {exportMode === "sms" && (
+              <>
+                <h2 className="text-2xl font-bold">Send via SMS</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Enter the phone number to text your 14-day summary to.
+                </p>
+                <label className="mt-6 block">
+                  <span className="mb-1.5 block text-base font-semibold">Phone number</span>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. 07123 456789"
+                    autoFocus
+                    className="w-full rounded-xl border-2 border-input bg-card px-4 py-4 text-2xl font-semibold tabular-nums outline-none focus:border-primary"
+                  />
+                </label>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setExportMode("menu")}
+                    className="flex-1 rounded-xl border-2 px-4 py-4 text-base font-semibold hover:bg-accent"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={doSms}
+                    className="flex-1 rounded-xl bg-primary px-4 py-4 text-base font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </>
+            )}
+
+            {exportMode === "email" && (
+              <>
+                <h2 className="text-2xl font-bold">Send via Email</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Enter the email address to send your 14-day summary to.
+                </p>
+                <label className="mt-6 block">
+                  <span className="mb-1.5 block text-base font-semibold">Email address</span>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    autoFocus
+                    className="w-full rounded-xl border-2 border-input bg-card px-4 py-4 text-xl font-semibold outline-none focus:border-primary"
+                  />
+                </label>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Want the PDF attached? Use “Export as PDF” and pick email from the share sheet.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setExportMode("menu")}
+                    className="flex-1 rounded-xl border-2 px-4 py-4 text-base font-semibold hover:bg-accent"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={doEmail}
+                    className="flex-1 rounded-xl bg-primary px-4 py-4 text-base font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </>
+            )}
+
+            {exportMode === "confirm" && (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div
+                  className="flex h-20 w-20 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `var(--zone-green-bg)` }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--zone-green)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-10 w-10"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <p className="mt-4 text-xl font-bold">{confirmMsg}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -327,6 +547,29 @@ function NumField({
         placeholder="—"
       />
     </label>
+  );
+}
+
+function ExportOption({
+  title,
+  subtitle,
+  onClick,
+}: {
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center justify-between rounded-xl border-2 border-input bg-card px-4 py-4 text-left hover:border-primary hover:bg-accent"
+    >
+      <span>
+        <span className="block text-base font-bold text-foreground">{title}</span>
+        <span className="block text-sm text-muted-foreground">{subtitle}</span>
+      </span>
+      <span className="text-2xl text-foreground/40">›</span>
+    </button>
   );
 }
 
