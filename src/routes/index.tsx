@@ -208,6 +208,10 @@ function Index() {
               </span>
               <span className="text-foreground/60">{formatDateTime(latest.timestamp)}</span>
             </div>
+            <p className="mt-3 text-xs leading-snug text-foreground/50">
+              *Ranges are for general educational reference only and do not constitute a medical
+              diagnosis. Consult your GP for medical advice.
+            </p>
           </section>
         ) : (
           <section className="mb-6 rounded-2xl border border-dashed p-8 text-center">
