@@ -94,13 +94,9 @@ function Index() {
   };
 
   const undoLast = () => {
-    if (!undoId) return;
-    const target = readings.find((r) => r.id === undoId);
-    if (!target) {
-      setUndoId(null);
-      return;
-    }
-    const next = readings.filter((r) => r.id !== undoId);
+    const target = readings[0];
+    if (!target) return;
+    const next = readings.slice(1);
     saveReadings(next);
     setReadings(next);
     setUndoId(null);
