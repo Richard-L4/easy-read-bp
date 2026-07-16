@@ -289,13 +289,13 @@ function Index() {
           <p className="mb-2 font-semibold text-foreground">UK NICE Zones</p>
           <ul className="space-y-1.5">
             <li className="flex items-center gap-2">
-              <Dot zone="green" /> Normal — below 135/85
+              <Dot zone="green" /> Normal — up to 136/86
             </li>
             <li className="flex items-center gap-2">
-              <Dot zone="amber" /> Stage 1 — 135–149 or 85–94
+              <Dot zone="amber" /> Stage 1 — 137–150 or 87–95
             </li>
             <li className="flex items-center gap-2">
-              <Dot zone="red" /> Stage 2 — 150+ or 95+
+              <Dot zone="red" /> Stage 2 — above 150 or 95
             </li>
           </ul>
         </section>
