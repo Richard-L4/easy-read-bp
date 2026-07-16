@@ -21,10 +21,10 @@ export const Route = createFileRoute("/")({
         content:
           "A clean, large-text blood pressure logbook. Log systolic, diastolic and pulse readings with UK NICE traffic-light zones and share your 14-day history.",
       },
-      { property: "og:title", content: "Blood Pressure Logbook" },
+      { property: "og:title", content: "Blood Pressure Logbook — Simple Home BP Tracker" },
       {
         property: "og:description",
-        content: "Simple 14-day home BP tracker with UK traffic-light zones.",
+        content: "A clean, large-text blood pressure logbook. Log systolic, diastolic and pulse readings with UK NICE traffic-light zones and share your 14-day history.",
       },
     ],
   }),

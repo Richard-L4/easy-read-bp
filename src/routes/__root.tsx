@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Blood Pressure Logbook" },
-      { name: "description", content: "Simple large-text home BP logbook with UK NICE traffic-light zones and 14-day share." },
+      { title: "Blood Pressure Logbook — Simple Home BP Tracker" },
+      { name: "description", content: "A clean, large-text blood pressure logbook. Log systolic, diastolic and pulse readings with UK NICE traffic-light zones and share your 14-day history." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Blood Pressure Logbook" },
-      { property: "og:description", content: "Simple large-text home BP logbook with UK NICE traffic-light zones and 14-day share." },
+      { property: "og:title", content: "Blood Pressure Logbook — Simple Home BP Tracker" },
+      { property: "og:description", content: "A clean, large-text blood pressure logbook. Log systolic, diastolic and pulse readings with UK NICE traffic-light zones and share your 14-day history." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
+      { name: "twitter:title", content: "Blood Pressure Logbook — Simple Home BP Tracker" },
+      { name: "twitter:description", content: "A clean, large-text blood pressure logbook. Log systolic, diastolic and pulse readings with UK NICE traffic-light zones and share your 14-day history." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6f94abc5-c489-4bec-b9a4-9514fbe141cb/id-preview-cea893e4--f7a3d81d-808d-4f96-8beb-560992427da9.lovable.app-1784209029269.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6f94abc5-c489-4bec-b9a4-9514fbe141cb/id-preview-cea893e4--f7a3d81d-808d-4f96-8beb-560992427da9.lovable.app-1784209029269.png" },
     ],
     links: [
       {
