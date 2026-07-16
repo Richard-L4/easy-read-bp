@@ -303,6 +303,15 @@ function Index() {
             </li>
           </ul>
         </section>
+
+        <section className="rounded-xl border border-muted/60 bg-muted/20 px-4 py-3 text-xs leading-relaxed text-muted-foreground/90">
+          <p>
+            All blood pressure readings and health data entered into this app are stored strictly
+            on your local device. We do not run external servers, and we have zero access to your
+            personal information. If you delete the app, your data will be permanently deleted
+            unless you have backed up your device locally.
+          </p>
+        </section>
       </main>
 
       {/* Fixed bottom action bar */}
