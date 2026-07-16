@@ -94,13 +94,9 @@ function Index() {
   };
 
   const undoLast = () => {
-    if (!undoId) return;
-    const target = readings.find((r) => r.id === undoId);
-    if (!target) {
-      setUndoId(null);
-      return;
-    }
-    const next = readings.filter((r) => r.id !== undoId);
+    const target = readings[0];
+    if (!target) return;
+    const next = readings.slice(1);
     saveReadings(next);
     setReadings(next);
     setUndoId(null);
@@ -222,17 +218,17 @@ function Index() {
           </section>
         )}
 
-        {undoId && latest && undoId === latest.id && (
+        {latest && (
           <div className="mb-6 flex items-center justify-between rounded-xl border bg-card px-4 py-3">
             <div className="text-sm">
-              <p className="font-semibold text-foreground">Reading saved</p>
-              <p className="text-muted-foreground">Made a mistake? Undo to re-enter.</p>
+              <p className="font-semibold text-foreground">Made a mistake?</p>
+              <p className="text-muted-foreground">Reset the latest reading and re-enter it.</p>
             </div>
             <button
               onClick={undoLast}
               className="rounded-lg border-2 border-primary/30 px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent"
             >
-              Undo
+              Reset
             </button>
           </div>
         )}
@@ -293,13 +289,13 @@ function Index() {
           <p className="mb-2 font-semibold text-foreground">UK NICE Zones</p>
           <ul className="space-y-1.5">
             <li className="flex items-center gap-2">
-              <Dot zone="green" /> Normal — below 135/85
+              <Dot zone="green" /> Normal — up to 136/86
             </li>
             <li className="flex items-center gap-2">
-              <Dot zone="amber" /> Stage 1 — 135–149 or 85–94
+              <Dot zone="amber" /> Stage 1 — 137–150 or 87–95
             </li>
             <li className="flex items-center gap-2">
-              <Dot zone="red" /> Stage 2 — 150+ or 95+
+              <Dot zone="red" /> Stage 2 — above 150 or 95
             </li>
           </ul>
         </section>
