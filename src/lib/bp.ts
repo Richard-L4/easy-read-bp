@@ -9,8 +9,11 @@ export interface Reading {
 }
 
 export function getZone(systolic: number, diastolic: number): Zone {
-  if (systolic >= 150 || diastolic >= 95 || systolic >= 180) return "red";
-  if (systolic >= 135 || diastolic >= 85) return "amber";
+  // Colors only change when readings EXCEED the previous thresholds.
+  // Amber: sys > 136 or dia > 86  (i.e. ≥ 137 / ≥ 87)
+  // Red:   sys > 150 or dia > 95  (i.e. ≥ 151 / ≥ 96)
+  if (systolic > 150 || diastolic > 95) return "red";
+  if (systolic > 136 || diastolic > 86) return "amber";
   return "green";
 }
 
