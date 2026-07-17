@@ -349,9 +349,10 @@ function Index() {
             </p>
 
             <form onSubmit={submit} className="mt-6 space-y-4">
-              <NumField label="Systolic" sublabel="Top number" value={sys} onChange={setSys} placeholder="115" autoFocus />
-              <NumField label="Diastolic" sublabel="Bottom number" value={dia} onChange={setDia} placeholder="70" />
-              <NumField label="Pulse" sublabel="Heart rate (bpm)" value={pul} onChange={setPul} placeholder="75" />
+              <NumField label="Systolic" sublabel="Top number" value={sys} onChange={setSys} placeholder="example 115" autoFocus />
+              <NumField label="Diastolic" sublabel="Bottom number" value={dia} onChange={setDia} placeholder="example 70" />
+              <NumField label="Pulse" sublabel="Heart rate (bpm)" value={pul} onChange={setPul} placeholder="example 75" />
+
 
 
               <div className="mt-6 flex gap-3">
