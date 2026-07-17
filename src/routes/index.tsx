@@ -349,9 +349,10 @@ function Index() {
             </p>
 
             <form onSubmit={submit} className="mt-6 space-y-4">
-              <NumField label="Systolic" sublabel="Top number" value={sys} onChange={setSys} placeholder="115" autoFocus />
-              <NumField label="Diastolic" sublabel="Bottom number" value={dia} onChange={setDia} placeholder="70" />
-              <NumField label="Pulse" sublabel="Heart rate (bpm)" value={pul} onChange={setPul} placeholder="75" />
+              <NumField label="Systolic" sublabel="Top number" value={sys} onChange={setSys} placeholder="example 115" autoFocus />
+              <NumField label="Diastolic" sublabel="Bottom number" value={dia} onChange={setDia} placeholder="example 70" />
+              <NumField label="Pulse" sublabel="Heart rate (bpm)" value={pul} onChange={setPul} placeholder="example 75" />
+
 
 
               <div className="mt-6 flex gap-3">
@@ -542,25 +543,38 @@ function NumField({
   placeholder?: string;
   autoFocus?: boolean;
 }) {
+  const [isFocused, setIsFocused] = useState(false);
+  const showExample = placeholder && (isFocused || value === "");
+
   return (
     <label className="block">
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-base font-semibold text-foreground">{label}</span>
         <span className="text-xs text-muted-foreground">{sublabel}</span>
       </div>
-      <input
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ""))}
-        autoFocus={autoFocus}
-        className="w-full rounded-xl border-2 border-input bg-card px-4 py-4 text-center text-4xl font-bold tabular-nums outline-none placeholder:text-muted-foreground/70 focus:border-primary"
-        placeholder={placeholder}
-      />
+      <div className="relative rounded-xl bg-card">
+        <input
+          type="number"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={value}
+          onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ""))}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          autoFocus={autoFocus}
+          className="relative z-10 w-full rounded-xl border-2 border-input bg-transparent px-4 py-4 text-center text-4xl font-bold tabular-nums outline-none focus:border-primary"
+          placeholder=""
+        />
+        {showExample && (
+          <span className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center text-4xl font-bold tabular-nums text-muted-foreground/40">
+            {placeholder}
+          </span>
+        )}
+      </div>
     </label>
   );
 }
+
 
 
 function ExportOption({
