@@ -532,12 +532,14 @@ function NumField({
   sublabel,
   value,
   onChange,
+  placeholder,
   autoFocus,
 }: {
   label: string;
   sublabel: string;
   value: string;
   onChange: (v: string) => void;
+  placeholder?: string;
   autoFocus?: boolean;
 }) {
   return (
@@ -553,12 +555,13 @@ function NumField({
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ""))}
         autoFocus={autoFocus}
-        className="w-full rounded-xl border-2 border-input bg-card px-4 py-4 text-center text-4xl font-bold tabular-nums outline-none focus:border-primary"
-        placeholder="—"
+        className="w-full rounded-xl border-2 border-input bg-card px-4 py-4 text-center text-4xl font-bold tabular-nums outline-none placeholder:text-muted-foreground/70 focus:border-primary"
+        placeholder={placeholder}
       />
     </label>
   );
 }
+
 
 function ExportOption({
   title,
