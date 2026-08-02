@@ -323,6 +323,11 @@ function Index() {
             unless you have backed up your device locally.
           </p>
         </section>
+
+        <footer className="mt-6 rounded-xl border bg-card p-4 text-center">
+          <SupportBlock />
+        </footer>
+
       </main>
 
       {/* Fixed bottom action bar */}
