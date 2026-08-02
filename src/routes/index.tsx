@@ -174,12 +174,21 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-md px-5 pt-8 pb-40">
-        <header className="mb-6">
-          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-            Blood Pressure
-          </p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Logbook</h1>
+        <header className="mb-6 flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              Blood Pressure
+            </p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight">Logbook</h1>
+          </div>
+          <button
+            onClick={() => setAboutOpen(true)}
+            className="rounded-lg border-2 border-input px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+          >
+            About
+          </button>
         </header>
+
 
         {latest && latestZone ? (
           <section
