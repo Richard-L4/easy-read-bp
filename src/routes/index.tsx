@@ -580,7 +580,27 @@ function Index() {
   );
 }
 
+function SupportBlock() {
+  return (
+    <>
+      <p className="text-sm font-semibold text-foreground">Enjoying this app?</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Support its continued development with a coffee ☕
+      </p>
+      <a
+        href="https://buymeacoffee.com/richardwells"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-4 text-base font-semibold text-primary-foreground hover:opacity-90"
+      >
+        Buy Me a Coffee
+      </a>
+    </>
+  );
+}
+
 function NumField({
+
   label,
   sublabel,
   value,
