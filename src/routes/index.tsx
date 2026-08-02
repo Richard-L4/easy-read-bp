@@ -42,6 +42,8 @@ function Index() {
   const [toast, setToast] = useState<string | null>(null);
   const [undoId, setUndoId] = useState<string | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
+
 
   const [exportMode, setExportMode] = useState<ExportMode>(null);
   const [phone, setPhone] = useState("");
@@ -174,12 +176,21 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-md px-5 pt-8 pb-40">
-        <header className="mb-6">
-          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-            Blood Pressure
-          </p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Logbook</h1>
+        <header className="mb-6 flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              Blood Pressure
+            </p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight">Logbook</h1>
+          </div>
+          <button
+            onClick={() => setAboutOpen(true)}
+            className="rounded-lg border-2 border-input px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent"
+          >
+            About
+          </button>
         </header>
+
 
         {latest && latestZone ? (
           <section
@@ -312,6 +323,11 @@ function Index() {
             unless you have backed up your device locally.
           </p>
         </section>
+
+        <footer className="mt-6 rounded-xl border bg-card p-4 text-center">
+          <SupportBlock />
+        </footer>
+
       </main>
 
       {/* Fixed bottom action bar */}
@@ -519,7 +535,43 @@ function Index() {
         </div>
       )}
 
+      {aboutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl bg-background p-6 sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
+            <h2 className="text-2xl font-bold">About &amp; Settings</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Blood Pressure Logbook keeps your last 14 days of readings on this device only. It
+              works fully offline once installed — add it to your Home Screen from your browser
+              menu for a full-screen, app-like experience.
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground/90">
+              Ranges are for general educational reference only and do not constitute a medical
+              diagnosis. Consult your GP for medical advice.
+            </p>
+
+            <div className="mt-6 rounded-xl border bg-card p-4 text-center">
+              <SupportBlock />
+            </div>
+
+            <button
+              onClick={() => setAboutOpen(false)}
+              className="mt-6 w-full rounded-xl border-2 px-4 py-4 text-base font-semibold hover:bg-accent"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {toast && (
+
         <div className="fixed left-1/2 top-6 z-[60] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg">
           {toast}
         </div>
@@ -528,7 +580,27 @@ function Index() {
   );
 }
 
+function SupportBlock() {
+  return (
+    <>
+      <p className="text-sm font-semibold text-foreground">Enjoying this app?</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Support its continued development with a coffee ☕
+      </p>
+      <a
+        href="https://buymeacoffee.com/richardwells"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-4 text-base font-semibold text-primary-foreground hover:opacity-90"
+      >
+        Buy Me a Coffee
+      </a>
+    </>
+  );
+}
+
 function NumField({
+
   label,
   sublabel,
   value,
