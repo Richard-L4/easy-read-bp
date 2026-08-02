@@ -42,6 +42,8 @@ function Index() {
   const [toast, setToast] = useState<string | null>(null);
   const [undoId, setUndoId] = useState<string | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
+
 
   const [exportMode, setExportMode] = useState<ExportMode>(null);
   const [phone, setPhone] = useState("");
