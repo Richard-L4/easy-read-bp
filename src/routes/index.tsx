@@ -535,7 +535,43 @@ function Index() {
         </div>
       )}
 
+      {aboutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl bg-background p-6 sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
+            <h2 className="text-2xl font-bold">About &amp; Settings</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Blood Pressure Logbook keeps your last 14 days of readings on this device only. It
+              works fully offline once installed — add it to your Home Screen from your browser
+              menu for a full-screen, app-like experience.
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground/90">
+              Ranges are for general educational reference only and do not constitute a medical
+              diagnosis. Consult your GP for medical advice.
+            </p>
+
+            <div className="mt-6 rounded-xl border bg-card p-4 text-center">
+              <SupportBlock />
+            </div>
+
+            <button
+              onClick={() => setAboutOpen(false)}
+              className="mt-6 w-full rounded-xl border-2 px-4 py-4 text-base font-semibold hover:bg-accent"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {toast && (
+
         <div className="fixed left-1/2 top-6 z-[60] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg">
           {toast}
         </div>
