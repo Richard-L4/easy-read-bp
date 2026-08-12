@@ -328,6 +328,18 @@ function Index() {
           <SupportBlock />
         </footer>
 
+        <a
+          href="https://richard-wells.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-primary/10 bg-gradient-to-r from-primary/5 to-transparent px-4 py-3 text-sm transition-colors hover:border-primary/25 hover:bg-primary/[0.07]"
+        >
+          <span className="text-foreground/80">
+            <span className="font-semibold text-foreground">More products</span>
+            <span className="text-muted-foreground"> — visit richard-wells.com</span>
+          </span>
+          <span className="shrink-0 text-lg text-foreground/40">↗</span>
+        </a>
       </main>
 
       {/* Fixed bottom action bar */}
