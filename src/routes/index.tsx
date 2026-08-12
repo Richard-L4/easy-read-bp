@@ -335,7 +335,7 @@ function Index() {
           className="mt-11 flex items-center justify-between gap-3 rounded-xl border border-black/10 bg-[var(--support-bg)] px-4 py-3 text-sm font-semibold text-[var(--support-text)] transition-colors hover:bg-[var(--support-hover-bg)] hover:text-[var(--support-hover-text)]"
         >
           <span>
-            <span>More products</span>
+            <span>For more products</span>
             <span className="opacity-90"> — visit richard-wells.com</span>
           </span>
           <span className="shrink-0 text-lg">↗</span>
