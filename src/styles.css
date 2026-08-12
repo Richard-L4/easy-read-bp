@@ -70,7 +70,7 @@
   --support-bg: oklch(0.45 0.18 300);
   --support-text: oklch(0.92 0.16 95);
   --support-hover-bg: oklch(0.55 0.18 145);
-  --support-hover-text: oklch(0.1 0.02 240);
+  --support-hover-text: oklch(0.99 0 0);
 }
 
 @layer base {
