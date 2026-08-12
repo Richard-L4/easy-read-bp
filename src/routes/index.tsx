@@ -332,8 +332,7 @@ function Index() {
           href="https://richard-wells.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-black/10 px-4 py-3 text-sm font-semibold transition-colors hover:bg-[var(--support-hover-bg)] hover:text-[var(--support-hover-text)]"
-          style={{ backgroundColor: "var(--support-bg)", color: "var(--support-text)" }}
+          className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-black/10 bg-[var(--support-bg)] px-4 py-3 text-sm font-semibold text-[var(--support-text)] transition-colors hover:bg-[var(--support-hover-bg)] hover:text-[var(--support-hover-text)]"
         >
           <span>
             <span>More products</span>
