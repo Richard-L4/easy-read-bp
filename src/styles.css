@@ -66,6 +66,11 @@
   --zone-amber-bg: oklch(0.94 0.08 80);
   --zone-red: oklch(0.5 0.22 25);
   --zone-red-bg: oklch(0.94 0.06 25);
+
+  --support-bg: oklch(0.45 0.18 300);
+  --support-text: oklch(0.92 0.16 95);
+  --support-hover-bg: oklch(0.55 0.18 145);
+  --support-hover-text: oklch(0.1 0.02 240);
 }
 
 @layer base {
