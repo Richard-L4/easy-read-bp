@@ -171,6 +171,29 @@ function Index() {
     finishWithConfirm("Opening email…");
   };
 
+  const doWhatsApp = async () => {
+    const text = buildShareText(readings);
+    const nav = navigator as Navigator & {
+      share?: (data: { text?: string }) => Promise<void>;
+      canShare?: (data: unknown) => boolean;
+    };
+    try {
+      if (nav.share && (!nav.canShare || nav.canShare({ text }))) {
+        await nav.share({ text });
+        finishWithConfirm("Shared successfully");
+        return;
+      }
+    } catch {
+      // Fall back to the WhatsApp web/app URL.
+    }
+    try {
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+      finishWithConfirm("Opening WhatsApp…");
+    } catch {
+      showToast("Unable to open WhatsApp");
+    }
+  };
+
   const latest = readings[0];
   const latestZone: Zone | null = latest ? getZone(latest.systolic, latest.diastolic) : null;
 
