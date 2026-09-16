@@ -1,46 +1,34 @@
-## Features to add
+# Home Screen install prompt for Easy Read BP
 
-### 1. Undo last reading
-- After saving a new reading, show an inline "Undo last reading" banner directly under the "Latest reading" card for ~8 seconds (dismissable).
-- Tapping Undo removes that reading from storage and reopens the Add Reading modal pre-filled with its systolic/diastolic/pulse so the user can correct and re-save.
-- Implementation: track `lastAddedId` + a timeout in `Index`. Banner styled to match existing rounded-2xl card language, using muted background with a primary-colored "Undo" action.
+Add a one-time, friendly "Add to Home Screen" modal plus a discreet permanent reminder. No changes to readings, zones, storage, export, About, or the Buy Me a Coffee link.
 
-### 2. Export flow (PDF / SMS / Email)
-Replace the current "Share 14-Day History" bottom button with an "Export" button that opens an export sheet (bottom modal, same visual style as the Add Reading modal) with three large options:
+## What users will see
 
-**a. Export as PDF**
-- Generate a client-side PDF of the last 14 days using `jspdf` (small, works in browser, no native deps).
-- Columns: Date, Time, Systolic/Diastolic, Pulse, Zone. Title header + NICE thresholds footnote.
-- Convert to a `File` and call `navigator.share({ files: [pdf] })` when supported; otherwise trigger a download as fallback.
-- On success (share resolves or download starts) show the green-check "Sent successfully" confirmation state, then return to main screen.
+### First visit (per browser/device)
+A small, clean modal (not full-screen) matching the app's existing design:
 
-**b. Send via SMS**
-- Opens an in-app screen (modal view) with a phone number input + Continue button.
-- Continue builds `sms:<number>?body=<encoded plain-text 14-day summary>` (using `&body=` on Android UA, `?&body=` fallback per iOS quirk) and navigates via `window.location.href`.
-- On return (visibilitychange back to visible after nav), show the green-check confirmation, then close.
+- Title: "Keep Easy Read BP handy"
+- Body: "Add it to your Home Screen for quick access whenever you want to record or check your readings."
+- Device-specific instructions:
+  - iPhone/iPad: open in Safari → Share button → Add to Home Screen → Add (with a note about opening as a web app where supported)
+  - Android: open in Chrome → ⋮ menu → "Install app" / "Add to Home Screen" (wording accommodates Chrome variations)
+  - Desktop/unidentified: "Use Easy Read BP on your phone? You can add it to your phone's Home Screen for quick access." (no mobile-specific steps)
+- Buttons: "Got it" (primary) and "Maybe later" (secondary) — both close the modal and record that it was seen.
 
-**c. Send via Email**
-- Opens an in-app screen with an email input + Continue button.
-- Continue builds `mailto:<email>?subject=Blood%20Pressure%20Log%20—%20Last%2014%20Days&body=<encoded summary>` and navigates.
-- Includes a small note: "For a PDF attachment, use Export as PDF and pick email from the share sheet."
-- Same green-check confirmation on return.
+### After dismissal
+A small, subtle "📱 Add to Home Screen" reminder placed near the footer/support area. Tapping it reopens the same instructions modal. It never pops up on its own again.
 
-### 3. Confirmation state
-- Shared `<SentConfirmation />` component: centered green check icon (using `--zone-green`), "Sent successfully" text, auto-dismisses after 1.6s and returns to the main screen.
+## Behaviour rules
+
+- Shown once per browser/device via localStorage key `easy-read-bp-home-screen-prompt-v1`; set on either button so the large modal never reappears.
+- Simple device detection from the user agent (iOS / Android / other) — no libraries, no fingerprinting.
+- No install forcing, no notification permission, no analytics, no personal data — privacy model unchanged.
 
 ## Technical details
 
-- **New dep:** `jspdf` (added via `bun add jspdf`).
-- **New file:** `src/lib/pdf.ts` — `buildPdf(readings: Reading[]): Blob` using jspdf + `autoTable`-free manual layout (keep deps minimal, just `jspdf`).
-- **Edit:** `src/routes/index.tsx`
-  - Add state: `undoInfo`, `exportSheetOpen`, `exportMode` (`null | "menu" | "sms" | "email" | "confirm"`), `phone`, `email`.
-  - Replace bottom "Share 14-Day History" button with "Export".
-  - Add undo banner rendering under latest card.
-  - Add ExportSheet modal (mirrors Add Reading modal styling) with three-step flow: menu → sms/email input → confirm.
-  - Keep existing `buildShareText` for SMS/email bodies.
-- **No changes** to `bp.ts` traffic-light logic, storage rules, or `__root.tsx`.
-
-## Files touched
-- `package.json` (add jspdf)
-- `src/lib/pdf.ts` (new)
-- `src/routes/index.tsx` (undo banner + export sheet + confirmation state)
+- `src/lib/homeScreenPrompt.ts` (new): localStorage seen/dismiss helpers and `getDeviceKind()` user-agent check.
+- `src/components/HomeScreenPrompt.tsx` (new): the modal (device-aware steps) + the small reminder link.
+- `src/routes/index.tsx`: render the reminder near the footer and mount the modal; modal auto-opens only on first visit.
+- Reuse existing modal styling patterns already in index.tsx; no new dependencies.
+- Verified: no existing install-prompt code in the app (only a text mention in About), so nothing to reuse.
+- Test at mobile and desktop viewport sizes; confirm the modal appears once, dismissal persists across reload, and the reminder reopens instructions.
