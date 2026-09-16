@@ -11,6 +11,7 @@ import {
   zoneLabel,
 } from "@/lib/bp";
 import { buildPdf } from "@/lib/pdf";
+import { HomeScreenPrompt } from "@/components/HomeScreenPrompt";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -326,6 +327,7 @@ function Index() {
 
         <footer className="mt-6 rounded-xl border bg-card p-4 text-center">
           <SupportBlock />
+          <HomeScreenPrompt />
         </footer>
 
         <a
