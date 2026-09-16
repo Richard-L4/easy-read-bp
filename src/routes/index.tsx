@@ -462,6 +462,11 @@ function Index() {
                     subtitle="Open your email app with a text summary"
                     onClick={() => setExportMode("email")}
                   />
+                  <ExportOption
+                    title="Send via WhatsApp"
+                    subtitle="Share your summary through WhatsApp or your device's share sheet"
+                    onClick={doWhatsApp}
+                  />
                 </div>
                 <button
                   onClick={() => setExportMode(null)}
